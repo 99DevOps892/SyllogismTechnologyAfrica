@@ -1,0 +1,748 @@
+﻿{
+    "project":  "vfkqjapegrhdsrlmmiih",
+    "label":  "MALI",
+    "exported_at":  "2026-09-22T04:08:10",
+    "tables":  [
+                   {
+                       "name":  "mali_contribution",
+                       "columns":  [
+                                       {
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  "gen_random_uuid()"
+                                       },
+                                       {
+                                           "name":  "cycle_id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "member_id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "amount",
+                                           "type":  "numeric",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "currency",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  "\u0027XOF\u0027::text"
+                                       },
+                                       {
+                                           "name":  "channel_id",
+                                           "type":  "bigint",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "paid_on",
+                                           "type":  "date",
+                                           "nullable":  false,
+                                           "default":  "CURRENT_DATE"
+                                       },
+                                       {
+                                           "name":  "ref_no",
+                                           "type":  "text",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "verified_by",
+                                           "type":  "uuid",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "verified_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false,
+                                           "default":  "now()"
+                                       }
+                                   ],
+                       "primary_key":  "id",
+                       "foreign_keys":  [
+                                            {
+                                                "name":  "mali_contribution_channel_id_fkey",
+                                                "cols":  "channel_id",
+                                                "ref_table":  "mali_payment_channel",
+                                                "ref_cols":  "id"
+                                            },
+                                            {
+                                                "name":  "mali_contribution_cycle_id_fkey",
+                                                "cols":  "cycle_id",
+                                                "ref_table":  "mali_cycle",
+                                                "ref_cols":  "id"
+                                            },
+                                            {
+                                                "name":  "mali_contribution_member_id_fkey",
+                                                "cols":  "member_id",
+                                                "ref_table":  "mali_union_member",
+                                                "ref_cols":  "id"
+                                            },
+                                            {
+                                                "name":  "mali_contribution_verified_by_fkey",
+                                                "cols":  "verified_by",
+                                                "ref_table":  "users",
+                                                "ref_cols":  "id"
+                                            }
+                                        ],
+                       "row_count":  0,
+                       "row_security":  true
+                   },
+                   {
+                       "name":  "mali_cycle",
+                       "columns":  [
+                                       {
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  "gen_random_uuid()"
+                                       },
+                                       {
+                                           "name":  "group_id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "saving_type",
+                                           "type":  "bigint",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "state",
+                                           "type":  "smallint",
+                                           "nullable":  false,
+                                           "default":  "1"
+                                       },
+                                       {
+                                           "name":  "name",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "contribution",
+                                           "type":  "numeric",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "currency",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  "\u0027XOF\u0027::text"
+                                       },
+                                       {
+                                           "name":  "frequency",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  "\u0027weekly\u0027::text"
+                                       },
+                                       {
+                                           "name":  "start_date",
+                                           "type":  "date",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "end_date",
+                                           "type":  "date",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "frequence",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  "\u0027weekly\u0027::text"
+                                       },
+                                       {
+                                           "name":  "pot_target",
+                                           "type":  "numeric",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "is_rotating",
+                                           "type":  "boolean",
+                                           "nullable":  false,
+                                           "default":  "false"
+                                       },
+                                       {
+                                           "name":  "created_by",
+                                           "type":  "uuid",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false,
+                                           "default":  "now()"
+                                       },
+                                       {
+                                           "name":  "updated_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false,
+                                           "default":  "now()"
+                                       }
+                                   ],
+                       "primary_key":  "id",
+                       "foreign_keys":  [
+                                            {
+                                                "name":  "mali_cycle_created_by_fkey",
+                                                "cols":  "created_by",
+                                                "ref_table":  "users",
+                                                "ref_cols":  "id"
+                                            },
+                                            {
+                                                "name":  "mali_cycle_group_id_fkey",
+                                                "cols":  "group_id",
+                                                "ref_table":  "mali_union_group",
+                                                "ref_cols":  "id"
+                                            },
+                                            {
+                                                "name":  "mali_cycle_saving_type_fkey",
+                                                "cols":  "saving_type",
+                                                "ref_table":  "mali_saving_type",
+                                                "ref_cols":  "id"
+                                            },
+                                            {
+                                                "name":  "mali_cycle_state_fkey",
+                                                "cols":  "state",
+                                                "ref_table":  "mali_cycle_state",
+                                                "ref_cols":  "id"
+                                            }
+                                        ],
+                       "row_count":  0,
+                       "row_security":  true
+                   },
+                   {
+                       "name":  "mali_cycle_state",
+                       "columns":  [
+                                       {
+                                           "name":  "id",
+                                           "type":  "smallint",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "code",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "label",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  null
+                                       }
+                                   ],
+                       "primary_key":  "id",
+                       "foreign_keys":  [
+
+                                        ],
+                       "row_count":  5,
+                       "row_security":  true
+                   },
+                   {
+                       "name":  "mali_ethnic_group",
+                       "columns":  [
+                                       {
+                                           "name":  "id",
+                                           "type":  "bigint",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "code",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "name",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "region",
+                                           "type":  "text",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false,
+                                           "default":  "now()"
+                                       }
+                                   ],
+                       "primary_key":  "id",
+                       "foreign_keys":  [
+
+                                        ],
+                       "row_count":  6,
+                       "row_security":  true
+                   },
+                   {
+                       "name":  "mali_loan",
+                       "columns":  [
+                                       {
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  "gen_random_uuid()"
+                                       },
+                                       {
+                                           "name":  "group_id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "member_id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "principal",
+                                           "type":  "numeric",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "currency",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  "\u0027XOF\u0027::text"
+                                       },
+                                       {
+                                           "name":  "interest_rate",
+                                           "type":  "numeric",
+                                           "nullable":  false,
+                                           "default":  "0"
+                                       },
+                                       {
+                                           "name":  "term_months",
+                                           "type":  "smallint",
+                                           "nullable":  false,
+                                           "default":  "3"
+                                       },
+                                       {
+                                           "name":  "purpose",
+                                           "type":  "text",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "issued_on",
+                                           "type":  "date",
+                                           "nullable":  false,
+                                           "default":  "CURRENT_DATE"
+                                       },
+                                       {
+                                           "name":  "due_on",
+                                           "type":  "date",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "state",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  "\u0027active\u0027::text"
+                                       },
+                                       {
+                                           "name":  "approved_by",
+                                           "type":  "uuid",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false,
+                                           "default":  "now()"
+                                       }
+                                   ],
+                       "primary_key":  "id",
+                       "foreign_keys":  [
+                                            {
+                                                "name":  "mali_loan_approved_by_fkey",
+                                                "cols":  "approved_by",
+                                                "ref_table":  "users",
+                                                "ref_cols":  "id"
+                                            },
+                                            {
+                                                "name":  "mali_loan_group_id_fkey",
+                                                "cols":  "group_id",
+                                                "ref_table":  "mali_union_group",
+                                                "ref_cols":  "id"
+                                            },
+                                            {
+                                                "name":  "mali_loan_member_id_fkey",
+                                                "cols":  "member_id",
+                                                "ref_table":  "mali_union_member",
+                                                "ref_cols":  "id"
+                                            }
+                                        ],
+                       "row_count":  0,
+                       "row_security":  true
+                   },
+                   {
+                       "name":  "mali_payment_channel",
+                       "columns":  [
+                                       {
+                                           "name":  "id",
+                                           "type":  "bigint",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "code",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "name",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "settlement_days",
+                                           "type":  "smallint",
+                                           "nullable":  false,
+                                           "default":  "1"
+                                       },
+                                       {
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false,
+                                           "default":  "now()"
+                                       }
+                                   ],
+                       "primary_key":  "id",
+                       "foreign_keys":  [
+
+                                        ],
+                       "row_count":  6,
+                       "row_security":  true
+                   },
+                   {
+                       "name":  "mali_payout",
+                       "columns":  [
+                                       {
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  "gen_random_uuid()"
+                                       },
+                                       {
+                                           "name":  "cycle_id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "member_id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "turn_no",
+                                           "type":  "smallint",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "amount",
+                                           "type":  "numeric",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "currency",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  "\u0027XOF\u0027::text"
+                                       },
+                                       {
+                                           "name":  "paid_through",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  "\u0027mobile_money\u0027::text"
+                                       },
+                                       {
+                                           "name":  "paid_on",
+                                           "type":  "date",
+                                           "nullable":  false,
+                                           "default":  "CURRENT_DATE"
+                                       },
+                                       {
+                                           "name":  "ref_no",
+                                           "type":  "text",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "confirmed",
+                                           "type":  "boolean",
+                                           "nullable":  false,
+                                           "default":  "false"
+                                       },
+                                       {
+                                           "name":  "created_by",
+                                           "type":  "uuid",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false,
+                                           "default":  "now()"
+                                       }
+                                   ],
+                       "primary_key":  "id",
+                       "foreign_keys":  [
+                                            {
+                                                "name":  "mali_payout_created_by_fkey",
+                                                "cols":  "created_by",
+                                                "ref_table":  "users",
+                                                "ref_cols":  "id"
+                                            },
+                                            {
+                                                "name":  "mali_payout_cycle_id_fkey",
+                                                "cols":  "cycle_id",
+                                                "ref_table":  "mali_cycle",
+                                                "ref_cols":  "id"
+                                            },
+                                            {
+                                                "name":  "mali_payout_member_id_fkey",
+                                                "cols":  "member_id",
+                                                "ref_table":  "mali_union_member",
+                                                "ref_cols":  "id"
+                                            }
+                                        ],
+                       "row_count":  0,
+                       "row_security":  true
+                   },
+                   {
+                       "name":  "mali_saving_type",
+                       "columns":  [
+                                       {
+                                           "name":  "id",
+                                           "type":  "bigint",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "code",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "name",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "is_rotating",
+                                           "type":  "boolean",
+                                           "nullable":  false,
+                                           "default":  "false"
+                                       },
+                                       {
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false,
+                                           "default":  "now()"
+                                       }
+                                   ],
+                       "primary_key":  "id",
+                       "foreign_keys":  [
+
+                                        ],
+                       "row_count":  5,
+                       "row_security":  true
+                   },
+                   {
+                       "name":  "mali_union_group",
+                       "columns":  [
+                                       {
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  "gen_random_uuid()"
+                                       },
+                                       {
+                                           "name":  "name",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "currency",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  "\u0027XOF\u0027::text"
+                                       },
+                                       {
+                                           "name":  "description",
+                                           "type":  "text",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "is_active",
+                                           "type":  "boolean",
+                                           "nullable":  false,
+                                           "default":  "true"
+                                       },
+                                       {
+                                           "name":  "created_by",
+                                           "type":  "uuid",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false,
+                                           "default":  "now()"
+                                       },
+                                       {
+                                           "name":  "updated_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false,
+                                           "default":  "now()"
+                                       }
+                                   ],
+                       "primary_key":  "id",
+                       "foreign_keys":  [
+                                            {
+                                                "name":  "mali_union_group_created_by_fkey",
+                                                "cols":  "created_by",
+                                                "ref_table":  "users",
+                                                "ref_cols":  "id"
+                                            }
+                                        ],
+                       "row_count":  0,
+                       "row_security":  true
+                   },
+                   {
+                       "name":  "mali_union_member",
+                       "columns":  [
+                                       {
+                                           "name":  "id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  "gen_random_uuid()"
+                                       },
+                                       {
+                                           "name":  "group_id",
+                                           "type":  "uuid",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "auth_uid",
+                                           "type":  "uuid",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "phone",
+                                           "type":  "text",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "full_name",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "national_id",
+                                           "type":  "text",
+                                           "nullable":  true,
+                                           "default":  null
+                                       },
+                                       {
+                                           "name":  "join_date",
+                                           "type":  "date",
+                                           "nullable":  false,
+                                           "default":  "CURRENT_DATE"
+                                       },
+                                       {
+                                           "name":  "role",
+                                           "type":  "text",
+                                           "nullable":  false,
+                                           "default":  "\u0027member\u0027::text"
+                                       },
+                                       {
+                                           "name":  "is_active",
+                                           "type":  "boolean",
+                                           "nullable":  false,
+                                           "default":  "true"
+                                       },
+                                       {
+                                           "name":  "created_at",
+                                           "type":  "timestamp with time zone",
+                                           "nullable":  false,
+                                           "default":  "now()"
+                                       }
+                                   ],
+                       "primary_key":  "id",
+                       "foreign_keys":  [
+                                            {
+                                                "name":  "mali_union_member_auth_uid_fkey",
+                                                "cols":  "auth_uid",
+                                                "ref_table":  "users",
+                                                "ref_cols":  "id"
+                                            },
+                                            {
+                                                "name":  "mali_union_member_group_id_fkey",
+                                                "cols":  "group_id",
+                                                "ref_table":  "mali_union_group",
+                                                "ref_cols":  "id"
+                                            }
+                                        ],
+                       "row_count":  0,
+                       "row_security":  true
+                   }
+               ],
+    "views":  [
+
+              ],
+    "rls":  10,
+    "buckets":  [
+
+                ]
+}

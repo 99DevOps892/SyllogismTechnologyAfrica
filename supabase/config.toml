@@ -1,0 +1,51 @@
+# =============================================================================
+# Supabase project config for SyllogismTechnologyAfrica (STA Core)
+# Set project_id to your new STA Core project ref when created.
+# =============================================================================
+
+project_id = "sta_core_placeholder"  # TODO: replace with new STA Core project ref
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[api.dashboards]
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = []
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+enable_anonymous_signins = false
+enable_email_signup = true
+enable_phone_signup = false
+enable_confirmations = true
+min_password_length = 8
+mailer_autoconfirm = false
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = true
+template_subject = "Confirm your signup for Syllogism Technology Africa"
+template_body = """
+<html><body><p>Hi,</p><p>Confirm your email to activate your STA account,</p>
+<p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">Confirm signup</a></p></body></html>
+"""
+
+[storage]
+enabled = true
+multipart_form_upload_size_limit = -1
+extra_add_headers = []
+
+[db]
+major_version = 15
+
+[deploy]
+entrypoint = "main.ts"

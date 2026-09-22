@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MALI Access Union · Group-Savings Store — schema visualizer</title>
+<style>
+  :root {
+    --bg:#0f172a; --panel:#1e293b; --panel2:#263548; --line:#334155;
+    --muted:#94a3b8; --ink:#e2e8f0; --accent:#22c55e; --accent2:#0ea5e9;
+    --badge:#334155; --origin:#7c5b00; --fx:#f59e0b; --warn:#f43f5e;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif; }
+  header { padding:16px 22px; border-bottom:1px solid var(--line); }
+  header h1 { margin:0 0 4px; font-size:19px; letter-spacing:.3px; }
+  header .sub { color:var(--muted); font-size:12.5px; }
+  header .tags { margin-top:8px; display:flex; gap:6px; flex-wrap:wrap; }
+  .tag { font-size:11px; padding:2px 9px; border-radius:999px;
+         background:var(--badge); color:#cbd5e1; border:1px solid var(--line); }
+  .tag.pot { background:var(--origin); color:#ffe9a8; }
+  .tag.rls { background:#14532d; color:#bbf7d0; }
+  main { padding:20px 22px; max-width:1180px; margin:0 auto; }
+  .intro { color:var(--muted); font-size:13px; line-height:1.6;
+           max-width:900px; margin-bottom:20px; }
+  section { margin-bottom:26px; }
+  section > h2 { font-size:13px; text-transform:uppercase; letter-spacing:1.2px;
+                 color:var(--accent2); margin:0 0 12px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:14px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .card .th { background:var(--panel2); padding:9px 12px; font-size:13px; font-weight:600;
+              display:flex; align-items:center; gap:8px; }
+  .card .th .seg { color:var(--accent); font-size:10px; letter-spacing:.6px; }
+  .card ul { list-style:none; margin:0; padding:4px 0; }
+  .card li { padding:4px 12px; font-size:12px; border-top:1px solid #1b263a;
+             display:flex; gap:7px; align-items:baseline; }
+  .cname { color:var(--ink); }
+  .ctype { color:var(--muted); font-size:11px; }
+  .pk { color:var(--accent2); font-size:10px; font-weight:700; }
+  .fx { color:var(--fx); font-size:10px; font-weight:700; }
+  footer { padding:14px 22px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
+  .note { font-size:11px; color:var(--muted); padding:6px 12px 8px; }
+</style>
+</head>

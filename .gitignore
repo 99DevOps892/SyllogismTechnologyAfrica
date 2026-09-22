@@ -1,0 +1,38 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# env / secrets — NEVER ignore or commit these
+.env
+.env.local
+.env.*.local
+!*.example
+SECRETS/
+*.pem
+*.key
+*.p12
+
+# supabase
+supabase/.temp/
+supabase/.branches/
+
+# build outputs
+.next/
+out/
+dist/
+build/
+.turbo/
+
+# logs
+*.log
+npm-debug.log*
+
+# editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# fabric / agent state
+fabric-data/

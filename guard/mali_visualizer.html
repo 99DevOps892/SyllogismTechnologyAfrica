@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MALI Access Union · Detailed Live Store Visualizer (groups · saccos · chamas)</title>
+<style>
+:root{--bg:#0b1220;--panel:#141e31;--panel2:#1b2a44;--line:#22334f;--muted:#7d8db0;
+--ink:#dbe4f4;--accent:#22c55e;--accent2:#0ea5e9;--origin:#f59e0b;--warn:#f43f5e;
+--live:#22c55e;--plan:#8b5cf6;--road:#f472b6;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+header{padding:16px 24px;background:var(--panel);border-bottom:1px solid var(--line);
+display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+header h1{font-size:19px;margin:0;letter-spacing:.2px}
+header .sub{width:100%;color:var(--muted);font-size:12px;margin-top:2px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-left:auto}
+.chip{font-size:11px;padding:3px 10px;border-radius:999px;background:var(--panel2);
+color:var(--ink);border:1px solid var(--line)}
+.chip.live{color:#bbf7d0;background:#0c2a1a;border-color:#15803d}
+.chip.stale{color:#ffe0a3;background:#3a2a08;border-color:#7c5b00}
+.chip.off{color:#fecaca;background:#3f1a1a;border-color:#b91c1c}
+.chip.ctrl{cursor:pointer;user-select:none}
+.chip.ctrl:hover{border-color:var(--accent2);color:#bfdbfe}
+main{padding:20px 24px;max-width:1280px;margin:0 auto}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.sum{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.sum b{display:block;font-size:24px;line-height:1.1}
+.sum span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.sum.live b{color:var(--live)}
+.sum.ref b{color:var(--accent2)}
+.topbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.freshness{font-size:12px;color:var(--muted)}
+section{margin-bottom:30px}
+section>h2{font-size:13px;text-transform:uppercase;letter-spacing:1.4px;color:var(--accent2);
+margin:0 0 4px}
+section>.sdesc{color:var(--muted);font-size:12.5px;margin:0 0 12px;max-width:960px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;
+display:flex;flex-direction:column}
+.card .hd{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:9px 14px;
+background:var(--panel2);border-bottom:1px solid var(--line)}
+.card .hd .t{font-weight:600;font-size:13px;font-family:ui-monospace,Consolas,monospace}
+.badge{font-size:9.5px;padding:2px 8px;border-radius:999px;letter-spacing:.4px;font-weight:700}
+.badge.live{background:#0c2a1a;color:#bbf7d0;border:1px solid #15803d}
+.badge.plan{background:#221335;color:#d8d0f5;border:1px solid #6d28d9}
+.badge.road{background:#2b1233;color:#f5d0e5;border:1px solid #be185d}
+.badge.rls{background:#0c2a1a;color:#a7f3d0;border:1px solid #166534}
+.badge.rows{background:#12233f;color:#bfdbfe;border:1px solid #1e40af}
+.card .cols{list-style:none;margin:0;padding:4px 0;flex:1}
+.card .cols li{display:flex;gap:7px;align-items:baseline;padding:4px 14px;
+border-top:1px solid #0e1826}
+.card .cols li:first-child{border-top:none}
+.cname{color:var(--ink);font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis}
+.ctype{color:var(--muted);font-size:11px}
+.cdef{color:#5b6b8c;font-size:10px;font-family:ui-monospace,Consolas,monospace}
+.mark{padding:0 4px;font-size:10px;font-weight:700}
+.mark.pk{color:var(--accent2)}
+.mark.fx{color:var(--origin)}
+.mark.nn{color:var(--warn);font-size:8.5px}
+.card .note{margin:0;padding:7px 14px 9px;font-size:11.5px;color:var(--muted);
+border-top:1px solid var(--line)}
+.card .note b{color:#bfdbfe}
+.card .note .src{display:block;margin-top:4px;font-size:10px;color:#58698a;
+font-family:ui-monospace,Consolas,monospace}
+.card .legendbar{display:flex;gap:10px;flex-wrap:wrap;padding:5px 14px;font-size:10px;color:#5b6b8c;
+border-top:1px solid var(--line)}
+footer{padding:14px 24px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+footer code, section code{color:var(--accent)}
+a{color:var(--accent2)}
+@media (prefers-reduced-motion:no-preference){
+  .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:var(--live);box-shadow:0 0 6px var(--live);margin-right:6px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>MALI Access Union · Detailed Store Visualizer</h1>
+  <span class="sub">Project <code>vfkqjapegrhdsrlmmiih</code> · public schema · XOF store · mirrors the Mwarokin estate visualizer conventions but scoped to group savings</span>
+  <div class="chips">
+    <span class="chip ref-chip" id="chipRef">MALI</span>
+    <span class="chip" id="chipRls">RLS · 6</span>
+    <span class="chip live" id="chipLive">← refreshing</span>
+    <button class="chip ctrl" id="btnRefresh" onclick="refreshNow()">↻ Refresh</button>
+    <button class="chip ctrl" id="btnAuto" onclick="toggleAuto()">Auto-refresh: on</button>
+  </div>
+</header>
+<main>
+  <div class="topbar"><span class="freshness" id="freshness"></span></div>
+  <div class="summary" id="summary"></div>
+
+  <section id="s-reference">
+    <h2>1 · Reference & Lookups</h2>
+    <p class="sdesc">Code-first reference tables shared by every cycle, member and ledger row: ethnic/region demographics, savings-product families, pot lifecycle states and mobile-money/bank payout channels.</p>
+    <div class="grid"></div>
+  </section>
+
+  <section id="s-groups">
+    <h2>2 · Groups & Members — the chama chapters</h2>
+    <p class="sdesc">Village savings associations / saving circles (a "chama"). Carries the chapter, its members and officers, and the governance entities of the fuller union model (meetings, membership links).</p>
+    <div class="grid"></div>
+  </section>
+
+  <section id="s-chamas">
+    <h2>3 · Chamas — rotating pots & merry-go-round</h2>
+    <p class="sdesc">The rotating saving rounds (tontine / esusu / equb): one pot per cycle, who is collecting, and the round-robin / table-banking payouts that decide who draws the lump sum.</p>
+    <div class="grid"></div>
+  </section>
+
+  <section id="s-saccos">
+    <h2>4 · SACCOs — savings & credit</h2>
+    <p class="sdesc">Savings & credit cooperative wing: contributions/(cash-in), solidarity loans out of the group float, loan repayments, meetings and member credit scoring history.</p>
+    <div class="grid"></div>
+  </section>
+
+  <section id="s-finance">
+    <h2>5 · Financial & Banking</h2>
+    <p class="sdesc">Money plumbing: payout channels (Orange Money · MTN · Moov · Airtel · bank · cash), the polymorphic financial ledger, annual/tax returns and admin audit logs.</p>
+    <div class="grid"></div>
+  </section>
+</main>
+<footer>
+  <span>Legend: <b class="live-dot"></b>LIVE on remote · <b class="badge plan">PLANNED</b>&nbsp;= next migration (<code>006_mali_union_group_savings.sql</code>) · <b class="badge road">ROADMAP</b>&nbsp;= full union model (Mali Access Union schema).</span>
+  <span>Data source: <code>snapshots/mali_schema.json</code> (read-only refresh via <code>scripts/snapshot-mali-live.ps1</code>). No credentials, no writes.</span>
+</footer>
+
+<script>
+var EMBEDDED = {"project":"vfkqjapegrhdsrlmmiih","label":"MALI","exported_at":"2026-09-22T04:08:10","tables":[{"name":"mali_contribution","columns":[{"name":"id","type":"uuid","nullable":false,"default":"gen_random_uuid()"},{"name":"cycle_id","type":"uuid","nullable":false,"default":null},{"name":"member_id","type":"uuid","nullable":false,"default":null},{"name":"amount","type":"numeric","nullable":false,"default":null},{"name":"currency","type":"text","nullable":false,"default":"'XOF'::text"},{"name":"channel_id","type":"bigint","nullable":true,"default":null},{"name":"paid_on","type":"date","nullable":false,"default":"CURRENT_DATE"},{"name":"ref_no","type":"text","nullable":true,"default":null},{"name":"verified_by","type":"uuid","nullable":true,"default":null},{"name":"verified_at","type":"timestamp with time zone","nullable":true,"default":null},{"name":"created_at","type":"timestamp with time zone","nullable":false,"default":"now()"}],"primary_key":"id","foreign_keys":[{"name":"mali_contribution_channel_id_fkey","cols":"channel_id","ref_table":"mali_payment_channel","ref_cols":"id"},{"name":"mali_contribution_cycle_id_fkey","cols":"cycle_id","ref_table":"mali_cycle","ref_cols":"id"},{"name":"mali_contribution_member_id_fkey","cols":"member_id","ref_table":"mali_union_member","ref_cols":"id"},{"name":"mali_contribution_verified_by_fkey","cols":"verified_by","ref_table":"users","ref_cols":"id"}],"row_count":0,"row_security":true},{"name":"mali_cycle","columns":[{"name":"id","type":"uuid","nullable":false,"default":"gen_random_uuid()"},{"name":"group_id","type":"uuid","nullable":false,"default":null},{"name":"saving_type","type":"bigint","nullable":false,"default":null},{"name":"state","type":"smallint","nullable":false,"default":"1"},{"name":"name","type":"text","nullable":false,"default":null},{"name":"contribution","type":"numeric","nullable":false,"default":null},{"name":"currency","type":"text","nullable":false,"default":"'XOF'::text"},{"name":"frequency","type":"text","nullable":false,"default":"'weekly'::text"},{"name":"start_date","type":"date","nullable":true,"default":null},{"name":"end_date","type":"date","nullable":true,"default":null},{"name":"frequence","type":"text","nullable":false,"default":"'weekly'::text"},{"name":"pot_target","type":"numeric","nullable":true,"default":null},{"name":"is_rotating","type":"boolean","nullable":false,"default":"false"},{"name":"created_by","type":"uuid","nullable":true,"default":null},{"name":"created_at","type":"timestamp with time zone","nullable":false,"default":"now()"},{"name":"updated_at","type":"timestamp with time zone","nullable":false,"default":"now()"}],"primary_key":"id","foreign_keys":[{"name":"mali_cycle_created_by_fkey","cols":"created_by","ref_table":"users","ref_cols":"id"},{"name":"mali_cycle_group_id_fkey","cols":"group_id","ref_table":"mali_union_group","ref_cols":"id"},{"name":"mali_cycle_saving_type_fkey","cols":"saving_type","ref_table":"mali_saving_type","ref_cols":"id"},{"name":"mali_cycle_state_fkey","cols":"state","ref_table":"mali_cycle_state","ref_cols":"id"}],"row_count":0,"row_security":true},{"name":"mali_cycle_state","columns":[{"name":"id","type":"smallint","nullable":false,"default":null},{"name":"code","type":"text","nullable":false,"default":null},{"name":"label","type":"text","nullable":false,"default":null}],"primary_key":"id","foreign_keys":[],"row_count":5,"row_security":true},{"name":"mali_ethnic_group","columns":[{"name":"id","type":"bigint","nullable":false,"default":null},{"name":"code","type":"text","nullable":false,"default":null},{"name":"name","type":"text","nullable":false,"default":null},{"name":"region","type":"text","nullable":true,"default":null},{"name":"created_at","type":"timestamp with time zone","nullable":false,"default":"now()"}],"primary_key":"id","foreign_keys":[],"row_count":6,"row_security":true},{"name":"mali_loan","columns":[{"name":"id","type":"uuid","nullable":false,"default":"gen_random_uuid()"},{"name":"group_id","type":"uuid","nullable":false,"default":null},{"name":"member_id","type":"uuid","nullable":false,"default":null},{"name":"principal","type":"numeric","nullable":false,"default":null},{"name":"currency","type":"text","nullable":false,"default":"'XOF'::text"},{"name":"interest_rate","type":"numeric","nullable":false,"default":"0"},{"name":"term_months","type":"smallint","nullable":false,"default":"3"},{"name":"purpose","type":"text","nullable":true,"default":null},{"name":"issued_on","type":"date","nullable":false,"default":"CURRENT_DATE"},{"name":"due_on","type":"date","nullable":true,"default":null},{"name":"state","type":"text","nullable":false,"default":"'active'::text"},{"name":"approved_by","type":"uuid","nullable":true,"default":null},{"name":"created_at","type":"timestamp with time zone","nullable":false,"default":"now()"}],"primary_key":"id","foreign_keys":[{"name":"mali_loan_approved_by_fkey","cols":"approved_by","ref_table":"users","ref_cols":"id"},{"name":"mali_loan_group_id_fkey","cols":"group_id","ref_table":"mali_union_group","ref_cols":"id"},{"name":"mali_loan_member_id_fkey","cols":"member_id","ref_table":"mali_union_member","ref_cols":"id"}],"row_count":0,"row_security":true},{"name":"mali_payment_channel","columns":[{"name":"id","type":"bigint","nullable":false,"default":null},{"name":"code","type":"text","nullable":false,"default":null},{"name":"name","type":"text","nullable":false,"default":null},{"name":"settlement_days","type":"smallint","nullable":false,"default":"1"},{"name":"created_at","type":"timestamp with time zone","nullable":false,"default":"now()"}],"primary_key":"id","foreign_keys":[],"row_count":6,"row_security":true},{"name":"mali_payout","columns":[{"name":"id","type":"uuid","nullable":false,"default":"gen_random_uuid()"},{"name":"cycle_id","type":"uuid","nullable":false,"default":null},{"name":"member_id","type":"uuid","nullable":false,"default":null},{"name":"turn_no","type":"smallint","nullable":true,"default":null},{"name":"amount","type":"numeric","nullable":false,"default":null},{"name":"currency","type":"text","nullable":false,"default":"'XOF'::text"},{"name":"paid_through","type":"text","nullable":false,"default":"'mobile_money'::text"},{"name":"paid_on","type":"date","nullable":false,"default":"CURRENT_DATE"},{"name":"ref_no","type":"text","nullable":true,"default":null},{"name":"confirmed","type":"boolean","nullable":false,"default":"false"},{"name":"created_by","type":"uuid","nullable":true,"default":null},{"name":"created_at","type":"timestamp with time zone","nullable":false,"default":"now()"}],"primary_key":"id","foreign_keys":[{"name":"mali_payout_created_by_fkey","cols":"created_by","ref_table":"users","ref_cols":"id"},{"name":"mali_payout_cycle_id_fkey","cols":"cycle_id","ref_table":"mali_cycle","ref_cols":"id"},{"name":"mali_payout_member_id_fkey","cols":"member_id","ref_table":"mali_union_member","ref_cols":"id"}],"row_count":0,"row_security":true},{"name":"mali_saving_type","columns":[{"name":"id","type":"bigint","nullable":false,"default":null},{"name":"code","type":"text","nullable":false,"default":null},{"name":"name","type":"text","nullable":false,"default":null},{"name":"is_rotating","type":"boolean","nullable":false,"default":"false"},{"name":"created_at","type":"timestamp with time zone","nullable":false,"default":"now()"}],"primary_key":"id","foreign_keys":[],"row_count":5,"row_security":true},{"name":"mali_union_group","columns":[{"name":"id","type":"uuid","nullable":false,"default":"gen_random_uuid()"},{"name":"name","type":"text","nullable":false,"default":null},{"name":"currency","type":"text","nullable":false,"default":"'XOF'::text"},{"name":"description","type":"text","nullable":true,"default":null},{"name":"is_active","type":"boolean","nullable":false,"default":"true"},{"name":"created_by","type":"uuid","nullable":true,"default":null},{"name":"created_at","type":"timestamp with time zone","nullable":false,"default":"now()"},{"name":"updated_at","type":"timestamp with time zone","nullable":false,"default":"now()"}],"primary_key":"id","foreign_keys":[{"name":"mali_union_group_created_by_fkey","cols":"created_by","ref_table":"users","ref_cols":"id"}],"row_count":0,"row_security":true},{"name":"mali_union_member","columns":[{"name":"id","type":"uuid","nullable":false,"default":"gen_random_uuid()"},{"name":"group_id","type":"uuid","nullable":false,"default":null},{"name":"auth_uid","type":"uuid","nullable":true,"default":null},{"name":"phone","type":"text","nullable":true,"default":null},{"name":"full_name","type":"text","nullable":false,"default":null},{"name":"national_id","type":"text","nullable":true,"default":null},{"name":"join_date","type":"date","nullable":false,"default":"CURRENT_DATE"},{"name":"role","type":"text","nullable":false,"default":"'member'::text"},{"name":"is_active","type":"boolean","nullable":false,"default":"true"},{"name":"created_at","type":"timestamp with time zone","nullable":false,"default":"now()"}],"primary_key":"id","foreign_keys":[{"name":"mali_union_member_auth_uid_fkey","cols":"auth_uid","ref_table":"users","ref_cols":"id"},{"name":"mali_union_member_group_id_fkey","cols":"group_id","ref_table":"mali_union_group","ref_cols":"id"}],"row_count":0,"row_security":true}],"views":[],"rls":10,"buckets":[]};
+
+var SECTIONS = {
+  reference:{ el:"s-reference", title:"1 · Reference & Lookups" },
+  groups:{ el:"s-groups", title:"2 · Groups & Members" },
+  chamas:{ el:"s-chamas", title:"3 · Chamas — Rotating Pots" },
+  saccos:{ el:"s-saccos", title:"4 · SACCOs — Savings & Credit" },
+  finance:{ el:"s-finance", title:"5 · Financial & Banking" }
+};
+
+var LIVE_MAP = {
+  mali_union_group:"groups", mali_cycle:"chamas", mali_cycle_state:"chamas",
+  mali_ethnic_group:"reference", mali_saving_type:"reference", mali_payment_channel:"finance"
+};
+
+var LIVE_IMAGES = {
+  mali_union_group:"a chapter / saving circle (also the RLS+FK root)",
+  mali_cycle:"one saving round — rotating or fixed pot",
+  mali_cycle_state:"forming → collecting → rotating → closed | failed",
+  mali_ethnic_group:"NINA / region demographics for members",
+  mali_saving_type:"tontine / nana / susu / esusu / equb",
+  mali_payment_channel:"orange_money · mtn_money · moov · airtel · bank · cash"
+};
+
+var PLANNED = [
+{t:"mali_union_member",sec:"groups",status:"plan",source:"006_mali_union_group_savings.sql",
+ d:"a member of a chapter + the 3 officers (president · treasurer · secretary); RLS member-scoped.",
+ cols:[["id","uuid","pk",0,0],["group_id","uuid",0,"mali_union_group"],["auth_uid","uuid",0,"auth.users"],
+       ["phone","text",0,0],["full_name","text","nn",0],["national_id","text",0,0],
+       ["join_date","date",0,0],["role","text",0,0],["is_active","boolean",0,0],["created_at","timestamptz",0,0]]},
+{t:"mali_contribution",sec:"saccos",status:"plan",source:"006_mali_union_group_savings.sql",
+ d:"cash-in ledger: per cycle, per member — the savings deposit line.",
+ cols:[["id","uuid","pk",0,0],["cycle_id","uuid",0,"mali_cycle"],["member_id","uuid",0,"mali_union_member"],
+       ["amount","numeric(12,2)","nn",0],["currency","text",0,0],["channel_id","bigint",0,"mali_payment_channel"],
+       ["paid_on","date",0,0],["ref_no","text",0,0],["verified_by","uuid",0,0],["verified_at","timestamptz",0,0],
+       ["created_at","timestamptz",0,0]]},
+{t:"mali_payout",sec:"chamas",status:"plan",source:"006_mali_union_group_savings.sql",
+ d:"who drew the rotating pot, in which turn, and how it was paid.",
+ cols:[["id","uuid","pk",0,0],["cycle_id","uuid",0,"mali_cycle"],["member_id","uuid",0,"mali_union_member"],
+       ["turn_no","smallint",0,0],["amount","numeric(12,2)","nn",0],["currency","text",0,0],
+       ["paid_through","text",0,0],["paid_on","date",0,0],["ref_no","text",0,0],
+       ["confirmed","boolean",0,0],["created_by","uuid",0,0],["created_at","timestamptz",0,0]]},
+{t:"mali_loan",sec:"saccos",status:"plan",source:"006_mali_union_group_savings.sql",
+ d:"solidarity loans extended out of the group float (active · repaid · defaulted · written_off).",
+ cols:[["id","uuid","pk",0,0],["group_id","uuid",0,"mali_union_group"],["member_id","uuid",0,"mali_union_member"],
+       ["principal","numeric(12,2)","nn",0],["currency","text",0,0],["interest_rate","numeric(4,2)",0,0],
+       ["term_months","smallint",0,0],["purpose","text",0,0],["issued_on","date",0,0],
+       ["due_on","date",0,0],["state","text",0,0],["approved_by","uuid",0,0],["created_at","timestamptz",0,0]]}
+];
+
+var ROADMAP = [
+{t:"members",sec:"groups",status:"road",source:"Mali Access Union schema · members",
+ d:"the union's people: roles (chairlady · secretary · treasurer · consultant · member) + live credit score.",
+ cols:[["id","uuid","pk",0,0],["first_name","varchar(50)",0,0],["last_name","varchar(50)",0,0],
+       ["phone","varchar(20)","nn",0],["email","varchar(100)",0,0],["passport_photo","text",0,0],
+       ["role","varchar(20)",0,0],["credit_score","integer",0,0],["joined_date","date",0,0],
+       ["status","varchar(20)",0,0],["created_at","timestamptz",0,0],["updated_at","timestamptz",0,0]]},
+{t:"groups",sec:"groups",status:"road",source:"Mali Access Union schema · groups",
+ d:"a chapter typed by purpose (savings · investment · welfare) with its head/chair + consultant.",
+ cols:[["id","uuid","pk",0,0],["name","varchar(100)","nn",0],["type","varchar(30)","nn",0],
+       ["head_member_id","uuid","nn","members"],["consultant_id","uuid",0,"members"],
+       ["created_date","date",0,0],["is_active","boolean",0,0]]},
+{t:"group_memberships",sec:"groups",status:"road",source:"Mali Access Union schema · group_memberships",
+ d:"many-to-many link — one member can sit in several groups; role override per group.",
+ cols:[["id","uuid","pk",0,0],["group_id","uuid","nn","groups"],["member_id","uuid","nn","members"],
+       ["joined_date","date",0,0],["role_in_group","varchar(20)",0,0]]},
+{t:"meetings",sec:"saccos",status:"road",source:"Mali Access Union schema · meetings",
+ d:"group events with minutes (recorded by the secretary) and venue — tax-venue conscious.",
+ cols:[["id","uuid","pk",0,0],["group_id","uuid","nn","groups"],["secretary_id","uuid","nn","members"],
+       ["meeting_date","timestamptz","nn",0],["title","varchar(100)",0,0],["minutes_notes","text",0,0],
+       ["venue","varchar(200)",0,0],["created_at","timestamptz",0,0]]},
+{t:"table_banking_cycles",sec:"chamas",status:"road",source:"Mali Access Union schema · table_banking_cycles",
+ d:"each table-banking round: fixed collection window and the total pool collected.",
+ cols:[["id","uuid","pk",0,0],["group_id","uuid","nn","groups"],["cycle_number","integer","nn",0],
+       ["start_date","date","nn",0],["end_date","date",0,0],["total_collected","decimal(12,2)",0,0]]},
+{t:"round_robin_rotations",sec:"chamas",status:"road",source:"Mali Access Union schema · round_robin_rotations",
+ d:"the 'raund robin': which member receives the full pot and in which rotation order.",
+ cols:[["id","uuid","pk",0,0],["cycle_id","uuid","nn","table_banking_cycles"],
+       ["meeting_id","uuid","nn","meetings"],["recipient_id","uuid","nn","members"],
+       ["amount_received","decimal(12,2)","nn",0],["rotation_order","integer","nn",0]]},
+{t:"loans",sec:"saccos",status:"road",source:"Mali Access Union schema · loans",
+ d:"group loans taken by members from the pool (pending · active · paid_off · defaulted).",
+ cols:[["id","uuid","pk",0,0],["member_id","uuid","nn","members"],["group_id","uuid","nn","groups"],
+       ["principal","decimal(12,2)","nn",0],["interest_rate","decimal(5,2)",0,0],
+       ["tenure_months","integer","nn",0],["disbursement_date","date",0,0],["status","varchar(20)",0,0],
+       ["approved_by","uuid",0,"members"],["created_at","timestamptz",0,0]]},
+{t:"loan_repayments",sec:"saccos",status:"road",source:"Mali Access Union schema · loan_repayments",
+ d:"instalments paid against a loan with the running remaining balance.",
+ cols:[["id","uuid","pk",0,0],["loan_id","uuid","nn","loans"],["amount","decimal(12,2)","nn",0],
+       ["payment_date","date","nn",0],["remaining_balance","decimal(12,2)","nn",0],
+       ["created_at","timestamptz",0,0]]},
+{t:"credit_score_history",sec:"saccos",status:"road",source:"Mali Access Union schema · credit_score_history",
+ d:"tracked changes to a member's credit score (late repayment · increased savings).",
+ cols:[["id","uuid","pk",0,0],["member_id","uuid","nn","members"],["score","integer","nn",0],
+       ["reason","text",0,0],["calculated_date","date",0,0]]},
+{t:"financial_transactions",sec:"finance",status:"road",source:"Mali Access Union schema · financial_transactions",
+ d:"polymorphic ledger: savings · loan_disbursement · loan_repayment · table_banking_contribution · table_banking_payout · fee.",
+ cols:[["id","uuid","pk",0,0],["group_id","uuid","nn","groups"],["member_id","uuid",0,"members"],
+       ["transaction_type","varchar(30)","nn",0],["amount","decimal(12,2)","nn",0],
+       ["transaction_date","date","nn",0],["description","text",0,0],["receipt_number","varchar(30)",0,0],
+       ["reference_id","uuid",0,0],["created_at","timestamptz",0,0]]},
+{t:"annual_returns",sec:"finance",status:"road",source:"Mali Access Union schema · annual_returns",
+ d:"fiscal filings per group-year: income, expenditure, tax remitted and the tax venue.",
+ cols:[["id","uuid","pk",0,0],["group_id","uuid","nn","groups"],["fiscal_year","varchar(9)","nn",0],
+       ["total_income","decimal(12,2)",0,0],["total_expenditure","decimal(12,2)",0,0],
+       ["tax_paid","decimal(12,2)",0,0],["tax_venue","varchar(200)",0,0],["filing_date","date",0,0],
+       ["filed_by","uuid",0,"members"],["created_at","timestamptz",0,0]]},
+{t:"audit_logs",sec:"finance",status:"road",source:"Mali Access Union schema · audit_logs",
+ d:"admin CRUD audit: who changed which row, before/after JSONB snapshots.",
+ cols:[["id","uuid","pk",0,0],["admin_id","uuid",0,"members"],["table_name","varchar(50)","nn",0],
+       ["record_id","uuid","nn",0],["action","varchar(10)","nn",0],["old_data","jsonb",0,0],
+       ["new_data","jsonb",0,0],["created_at","timestamptz",0,0]]}
+];
+
+var state = { snap:null, snapUrl:null, sorce:"embedded", auto:true, autoMs:30000, timer:null };
+
+function fmtType(t){ return (t||"").replace(/_/g," "); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+function age(iso){ return iso?Math.max(0,(Date.now()-new Date(iso).getTime())):Infinity; }
+function ageLabel(ms){ var m=Math.round(ms/60000); if(m<60) return m+" min ago"; var h=Math.round(m/60); return h+" h ago"; }
+
+var CANDIDATES = [
+  "mali_schema.json",
+  "../snapshots/mali_schema.json",
+  "../data/mali_schema.json",
+  "data/mali_schema.json",
+  "../../public/data/mali_schema.json"
+];
+
+function pick(idx){ return (idx<CANDIDATES.length)?CANDIDATES[idx]:null; }
+
+function loadSnap(done){
+  var i = -1;
+  function next(){
+    i++;
+    var u = pick(i);
+    if(!u){ state.snap = null; state.snapUrl=null; done(); return; }
+    var url = u + "?t=" + Date.now();
+    fetch(url).then(function(r){ if(!r.ok) throw 0; return r.text(); })
+      .then(function(txt){
+        var t = txt.replace(/^\uFEFF/,"");
+        var s = JSON.parse(t);
+        if(!s || !s.tables) throw 0;
+        state.snap = s; state.snapUrl = u; done();
+      }).catch(next);
+  }
+  next();
+}
+
+function useEmbedded(){
+  state.snap = (typeof EMBEDDED==="object" && EMBEDDED && EMBEDDED.tables) ? EMBEDDED : null;
+  state.snapUrl = "embedded";
+}
+
+function columnMarks(col, table){
+  var marks = "";
+  var pk = table.primary_key;
+  var pkArr = Array.isArray(pk)?pk:(pk?[pk]:[]);
+  if(pkArr.indexOf(col.name)>=0) marks += '<span class="mark pk">◆ PK</span>';
+  var fks = table.foreign_keys||[];
+  for(var f=0;f<fks.length;f++){
+    if(fks[f].cols === col.name)
+      marks += '<span class="mark fx">→ '+esc(fks[f].ref_table)+'</span>';
+  }
+  if(col.nullable === false) marks += '<span class="mark nn">NOT NULL</span>';
+  return marks;
+}
+
+function liveCard(t){
+  var map = LIVE_MAP[t.name]||"reference";
+  var img = LIVE_IMAGES[t.name]||"";
+  var pk = t.primary_key;
+  var pkArr = Array.isArray(pk)?pk:(pk?[pk]:[]);
+  var rows = (t.row_count==null||t.row_count<0)?"—":t.row_count;
+  var rls = t.row_security ? '<span class="badge rls">RLS ▲</span>' : '<span class="badge rls" style="border-color:#7c3aed">RLS off</span>';
+  var li = "";
+  for(var c=0;c<t.columns.length;c++){
+    var col = t.columns[c];
+    var def = col.default&&col.default!=="NULL"&&col.default!=="null" ? ' <span class="cdef">'+esc(col.default)+'</span>' : "";
+    li += '<li><span class="cname">'+esc(col.name)+'</span>'+columnMarks(col,t)+
+          '<span class="ctype">'+esc(fmtType(col.type))+'</span>'+def+'</li>';
+  }
+  return '<div class="card"><div class="hd"><span class="t">'+esc(t.name)+'</span>'+
+         '<span class="badge live">LIVE</span>'+rls+
+         '<span class="badge rows">'+esc(rows)+' rows</span></div>'+
+         '<ul class="cols">'+li+'</ul>'+
+         '<div class="legendbar"><span>PK: '+esc(pkArr.join(", "))+(
+           (t.foreign_keys&&t.foreign_keys.length)?
+             '</span><span>FKs: '+esc(t.foreign_keys.map(function(f){return f.cols+"→"+f.ref_table;}).join(", ")):
+             '</span><span>FKs: none')+'</span></div>'+
+         (img?'<p class="note">'+esc(img)+'</p>':"")+'</div>';
+}
+
+function defRow(r, isPk){
+  var marks = "";
+  if(r[2]==="pk") marks = '<span class="mark pk">◆ PK</span>';
+  else if(r[2]==="nn") marks = '<span class="mark nn">NOT NULL</span>';
+  if(r[3]) marks += '<span class="mark fx">→ '+esc(r[3])+'</span>';
+  return '<li><span class="cname">'+esc(r[0])+'</span>'+marks+'<span class="ctype">'+esc(fmtType(r[1]))+'</span></li>';
+}
+
+function plannedCard(p){
+  var rows = "";
+  for(var i=0;i<p.cols.length;i++) rows += defRow(p.cols[i]);
+  var badge = p.status==="plan" ? '<span class="badge plan">PLANNED</span>' : '<span class="badge road">ROADMAP</span>';
+  return '<div class="card"><div class="hd"><span class="t">'+esc(p.t)+'</span>'+badge+
+         '<span class="badge rls" style="border-color:#166534">RLS plan</span></div>'+
+         '<ul class="cols">'+rows+'</ul>'+
+         '<p class="note">'+esc(p.d)+'<span class="src">'+esc(p.source)+'</span></p></div>';
+}
+
+function render(){
+  var snap = state.snap;
+  var liveList = snap ? snap.tables : [];
+  var byName = {};
+  for(var i=0;i<liveList.length;i++) byName[liveList[i].name]=liveList[i];
+
+  var totalRows = 0; var liveCount = 0; var rlsCount = 0;
+  for(var k=0;k<liveList.length;k++){
+    var t = liveList[k]; liveCount++;
+    if(t.row_security) rlsCount++;
+    if(t.row_count>0) totalRows += t.row_count;
+  }
+  var plannedCount = PLANNED.length + ROADMAP.length;
+
+  document.getElementById("chipRls").textContent = "RLS · "+rlsCount;
+
+  var sum = document.getElementById("summary");
+  sum.innerHTML =
+    '<div class="sum live"><b>'+liveCount+'</b><span>live tables</span></div>'+
+    '<div class="sum"><b>'+plannedCount+'</b><span>planned + roadmap</span></div>'+
+    '<div class="sum ref"><b>'+rlsCount+'</b><span>RLS enabled</span></div>'+
+    '<div class="sum"><b>'+totalRows+'</b><span>rows (live)</span></div>';
+
+  var keys = Object.keys(SECTIONS);
+  for(var sIdx=0;sIdx<keys.length;sIdx++){
+    var secKey = keys[sIdx];
+    var sec = SECTIONS[secKey];
+    var grid = document.querySelector("#"+sec.el+" .grid");
+    grid.innerHTML = "";
+    for(var n in LIVE_MAP){
+      if(LIVE_MAP[n]!==secKey) continue;
+      var lt = byName[n];
+      if(!lt) continue;
+      grid.insertAdjacentHTML("beforeend", liveCard(lt));
+    }
+    var merged = PLANNED.concat(ROADMAP);
+    for(var pidx=0;pidx<merged.length;pidx++){
+      if(merged[pidx].sec===secKey)
+        grid.insertAdjacentHTML("beforeend", plannedCard(merged[pidx]));
+    }
+  }
+
+  var chip = document.getElementById("chipLive");
+  var fr = document.getElementById("freshness");
+  if(state.snap && state.snap.exported_at){
+    var at = state.snap.exported_at;
+    var a = age(at);
+    var local = new Date(at).toLocaleString();
+    if(a < 60*60*1000){ chip.className="chip live"; chip.innerHTML='<span class="live-dot"></span>LIVE · '+ageLabel(a); }
+    else if(a < 24*60*60*1000){ chip.className="chip stale"; chip.textContent="RECENT · "+ageLabel(a); }
+    else { chip.className="chip stale"; chip.textContent="STALE · "+ageLabel(a); }
+    fr.textContent = "Snapshot: "+ (state.snapUrl||"") +" · captured "+local+
+      " · refresh with scripts/snapshot-mali-live.ps1 (read-only, no credentials).";
+  } else {
+    chip.className="chip off"; chip.textContent="OFFLINE · embedded view";
+    fr.textContent = "No live snapshot found here — showing embedded last-captured view. To go live, serve this page over HTTP next to snapshots/mali_schema.json, or open the temp/disk copy.";
+  }
+}
+
+function refreshNow(){
+  var chip = document.getElementById("chipLive");
+  chip.className="chip stale"; chip.textContent="↻ refreshing…";
+  loadSnap(function(){
+    if(!state.snap) useEmbedded();
+    render();
+  });
+}
+
+function toggleAuto(){
+  state.auto = !state.auto;
+  var btn = document.getElementById("btnAuto");
+  btn.textContent = "Auto-refresh: "+(state.auto?"on":"off");
+  if(state.auto){ startAuto(); } else { if(state.timer){ clearInterval(state.timer); state.timer=null; } }
+}
+
+function startAuto(){
+  if(state.timer){ clearInterval(state.timer); state.timer=null; }
+  if(!state.auto) return;
+  state.timer = setInterval(function(){
+    if(location.protocol==="http:"||location.protocol==="https:") refreshNow();
+  }, state.autoMs);
+}
+
+(function init(){
+  if(typeof EMBEDDED==="string"){ try{ EMBEDDED = JSON.parse(EMBEDDED.replace(/^\uFEFF/,"")); }catch(e){ EMBEDDED=null; } }
+  state.auto = (location.protocol==="http:"||location.protocol==="https:");
+  document.getElementById("btnAuto").textContent = "Auto-refresh: "+(state.auto?"on":"off");
+  loadSnap(function(){
+    if(!state.snap) useEmbedded();
+    render();
+    startAuto();
+  });
+})();
+</script>
+</body>
+</html>
