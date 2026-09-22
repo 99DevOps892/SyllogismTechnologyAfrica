@@ -1,0 +1,54 @@
+name: Live health monitor
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Frontends reachable
+        run: |
+          for u in \
+            "https://99devops892.github.io/SyllogismTechnologyAfrica/" \
+            "https://99devops892.github.io/SyllogismTechnologyAfrica/mali/" \
+            "https://99devops892.github.io/mwarokin-estates/"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$u" || echo 000)
+            echo "$u -> $code"
+            if [ "$code" != "200" ]; then
+              echo "UNHEALTHY: $u"
+              exit 1
+            fi
+          done
+
+      - name: Mali anon REST read (realtime client path)
+        run: |
+          rows=$(curl -s -f "${{ secrets.SUPABASE_URL }}/rest/v1/mali_payment_channel?select=code&limit=100" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json" || echo "[]")
+          echo "mali lookup rows: $(echo "$rows" | jq 'length')"
+
+      - name: Live schema integrity (management API)
+        env:
+          SBT: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          MALI_REF: ${{ secrets.SUPABASE_PROJECT_ID }}
+        run: |
+          for ref in "$MALI_REF" spnerrqumefbuuscumhw; do
+            resp=$(curl -s -f -X POST "https://api.supabase.com/v1/projects/$ref/database/query" \
+              -H "Authorization: Bearer $SBT" \
+              -H "Content-Type: application/json" \
+              -d '{"query":"select (select count(*)::int from information_schema.tables where table_schema='"'"'public'"'"') as tables,(select count(*)::int from pg_tables t where t.schemaname='"'"'public'"'"' and t.rowsecurity) as rls,(select count(*)::int from pg_publication_tables where pubname='"'"'supabase_realtime'"'"' and schemaname='"'"'public'"'"') as rt"}' || echo '[]')
+            echo "$ref -> $(echo "$resp" | jq -c '.[0]')"
+          done
+          guard=$(curl -s -X POST "https://api.supabase.com/v1/projects/$MALI_REF/database/query" \
+            -H "Authorization: Bearer $SBT" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"select case when (select count(*)::int from pg_tables t where t.schemaname='"'"'public'"'"' and t.rowsecurity) = (select count(*)::int from information_schema.tables where table_schema='"'"'public'"'"') then '"'"'OK'"'"' else '"'"'DRIFT'"'"' end as guard"}' | jq -r '.[0].guard')
+          echo "Mali RLS guard: $guard"
+          if [ "$guard" != "OK" ]; then
+            echo "DRIFT: not all public Mali tables have RLS enabled"
+            exit 1
+          fi
